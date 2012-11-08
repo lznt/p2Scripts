@@ -18,7 +18,7 @@ var clicker =
     toggleHover : function(ent)
     {
         var h = ent.GetComponent("EC_Highlight", this.highlightName);
-        if (h == null)
+        if (h == null && ent.dynamiccomponent)
         {
             print("- Enabling selection");
             h = ent.CreateComponent("EC_Highlight", this.highlightName, 2, false);
@@ -45,9 +45,8 @@ var clicker =
     },
     //Handling keypresses in Tundra
     /*
-    
-    Tähän indexOf joka checkaa että onko valittu entity props tai joku muu jota voi liikutella
-    Näin saadaan muut jätettyä rauhaan.
+
+    Props will be distinguished from background entities with an EC_Dynamiccomponent called Prop
     
     */
     HandleKeyPressed : function(e)
@@ -56,9 +55,10 @@ var clicker =
         if(e.keyCode == Qt.Key_Up){
           var ents = scene.GetEntitiesWithComponent('EC_Highlight', this.highlightName);
           for(var i=0; i<ents.length; i++){
-              var tm = ents[i].placeable.transform;
-              tm.pos.x = tm.pos.x + 1;
-              ents[i].placeable.transform = tm;
+            var tm = ents[i].placeable.transform;
+            tm.pos.x = tm.pos.x + 1;
+            ents[i].placeable.transform = tm;
+              
           }
         }else if(e.keyCode == Qt.Key_Down){
           var ents = scene.GetEntitiesWithComponent('EC_Highlight', this.highlightName);
@@ -104,20 +104,19 @@ var clicker =
             ents[i].placeable.transform = tm;
           } 
         }else if(e.keyCode == Qt.Key_Shift){
-        var ents = scene.GetEntitiesWithComponent('EC_Highlight', this.highlightName);
-          for(var i=0; i<ents.length; i++){
-            var tm = ents[i].placeable.transform;
-            tm.rot.y = tm.rot.y - 1;
-            ents[i].placeable.transform = tm;
-          } 
+          var ents = scene.GetEntitiesWithComponent('EC_Highlight', this.highlightName);
+            for(var i=0; i<ents.length; i++){
+              var tm = ents[i].placeable.transform;
+              tm.rot.y = tm.rot.y - 1;
+              ents[i].placeable.transform = tm;
+            } 
         }
     },
     checkInputs : function(ent)
     {
         if(!inputMapper){
           var inputMapper = input.RegisterInputContextRaw('RendererSettings', 90);
-          inputMapper.KeyPressed.connect(this, this.HandleKeyPressed);
-          //print ('Now creating inputs for selected entity' + ent);     
+          inputMapper.KeyPressed.connect(this, this.HandleKeyPressed); 
         }
     },   
     init: function(ent)
