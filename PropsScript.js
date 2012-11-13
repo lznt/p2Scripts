@@ -56,7 +56,7 @@ var clicker =
           var ents = scene.GetEntitiesWithComponent('EC_Highlight', this.highlightName);
           for(var i=0; i<ents.length; i++){
             var tm = ents[i].placeable.transform;
-            tm.pos.x = tm.pos.x + 1;
+            tm.pos.x = tm.pos.x + 0.5;
             ents[i].placeable.transform = tm;
               
           }
@@ -64,51 +64,57 @@ var clicker =
           var ents = scene.GetEntitiesWithComponent('EC_Highlight', this.highlightName);
           for(var i=0; i<ents.length; i++){
               var tm = ents[i].placeable.transform;
-              tm.pos.x = tm.pos.x - 1;
+              tm.pos.x = tm.pos.x - 0.5;
               ents[i].placeable.transform = tm;
           }
         }else if(e.keyCode == Qt.Key_Right){
           var ents = scene.GetEntitiesWithComponent('EC_Highlight', this.highlightName);
           for(var i=0; i<ents.length; i++){
             var tm = ents[i].placeable.transform;
-            tm.pos.z = tm.pos.z + 1;
+            tm.pos.z = tm.pos.z + 0.5;
             ents[i].placeable.transform = tm;
           }
         }else if(e.keyCode == Qt.Key_Left){
           var ents = scene.GetEntitiesWithComponent('EC_Highlight', this.highlightName);
           for(var i=0; i<ents.length; i++){
             var tm = ents[i].placeable.transform;
-            tm.pos.z = tm.pos.z - 1;
+            tm.pos.z = tm.pos.z - 0.5;
             ents[i].placeable.transform = tm;
           }
         }else if(e.keyCode == Qt.Key_Space){
           var ents = scene.GetEntitiesWithComponent('EC_Highlight', this.highlightName);
           for(var i=0; i<ents.length; i++){
             var tm = ents[i].placeable.transform;
-            tm.pos.y = tm.pos.y + 1;
+            tm.pos.y = tm.pos.y + 0.5;
             ents[i].placeable.transform = tm;
           }
         }else if(e.keyCode == Qt.Key_Control){
           var ents = scene.GetEntitiesWithComponent('EC_Highlight', this.highlightName);
           for(var i=0; i<ents.length; i++){
             var tm = ents[i].placeable.transform;
-            tm.pos.y = tm.pos.y - 1;
+            tm.pos.y = tm.pos.y - 0.5;
             ents[i].placeable.transform = tm;
           }
-        //Add rotation.(Shift + CapsLock)
+        //Add rotation.(Tab + CapsLock)
         }else if(e.keyCode == Qt.Key_CapsLock){
           var ents = scene.GetEntitiesWithComponent('EC_Highlight', this.highlightName);
           for(var i=0; i<ents.length; i++){
             var tm = ents[i].placeable.transform;
-            tm.rot.y = tm.rot.y + 1;
+            tm.rot.y = tm.rot.y + 0.5;
             ents[i].placeable.transform = tm;
           } 
-        }else if(e.keyCode == Qt.Key_Shift){
+        }else if(e.keyCode == Qt.Key_Tab){
           var ents = scene.GetEntitiesWithComponent('EC_Highlight', this.highlightName);
             for(var i=0; i<ents.length; i++){
               var tm = ents[i].placeable.transform;
-              tm.rot.y = tm.rot.y - 1;
+              tm.rot.y = tm.rot.y - 0.5;
               ents[i].placeable.transform = tm;
+            } 
+        }else if(e.keyCode == Qt.Key_Delete){
+          var ents = scene.GetEntitiesWithComponent('EC_Highlight', this.highlightName);
+            for(var i=0; i<ents.length; i++){
+                //Maybe some prompt 'Are you sure you want to remove entity? etc here'
+                //scene.RemoveEntity(ents[i].Id());
             } 
         }
     },
@@ -117,6 +123,7 @@ var clicker =
         if(!inputMapper){
           var inputMapper = input.RegisterInputContextRaw('RendererSettings', 90);
           inputMapper.KeyPressed.connect(this, this.HandleKeyPressed); 
+          inputMapper.KeyDown.connect(this, this.HandleKeyPressed);
         }
     },   
     init: function(ent)
@@ -160,10 +167,11 @@ else
     Start();
 
 function OnScriptDestroyed(){
-  if(clicker != null )
-    clicker.removeHighlights(clicker.getSelectedEntities());
+  if(clicker != null ){
+    //clicker.removeHighlights(clicker.getSelectedEntities());
     input.UnregisterInputContextRaw("RendererSettings");
     data_ = null;
     clicker = null;
+  }
 
 }
