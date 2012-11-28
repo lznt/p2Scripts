@@ -234,7 +234,7 @@ function Init()
 	}
 	
   //Replace with ElementlistDoubleClicked()
-	function PropListItemDoubleClicked ();
+	function PropListItemDoubleClicked (){
 		CurrentClickedItemName = _PropListWidget.currentItem().text();
 		console.LogInfo(_PropListWidget.objectName);
 		console.LogInfo("CurrentClicked        PropListItem: " + CurrentClickedItemName);
@@ -251,10 +251,6 @@ function Init()
 		console.LogInfo(_BackgroundListWidget.objectName);
 		console.LogInfo("CurrentClicked        BackgroundListItem: " + CurrentClickedItemName);
 		
-		for(i in Backgrounds){
-      if(Backgrounds[i] == CurrentClickedItemName)
-      
-		}
 		LoadXML(CurrentClickedItemName);
 	}
 	
