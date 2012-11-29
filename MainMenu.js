@@ -1,27 +1,14 @@
 //!ref: Scripts/Background.ui
-//!ref: Scripts/MainMenu.ui
-//!ref: Scripts/Prop.ui
 //!ref: Scripts/Scene.ui
+//!ref: Scripts/MainMenu.ui
+//!ref: Scripts/PropType.ui
+//!ref: Scripts/Element.ui
+//!ref: Scripts/Object.ui
+//!ref: Scripts/ManMade.ui
+//!ref: Scripts/Effect.ui
 //!ref: Props/Sun.txml
-//!ref: Props/sun.mesh
+//!ref: Props/Car.txml
 //!ref: Props/PalmTrees.txml
-//!ref: Props/Moon.txml
-//!ref: Props/Volcano.txml
-//!ref: Props/Walrus.txml
-//!ref: Props/Beach.txml
-//!ref: Props/DaySky.txml
-//!ref: Props/Winter.txml
-//!ref: Props/Meadow.txml
-//!ref: Props/City.txml
-//!ref: Props/Forest.txml
-//!ref: Props/Mountains.txml
-//!ref: Props/Rocket.txml
-//!ref: Props/Buttefly.txml
-//!ref: Props/SandToys.txml
-//!ref: Props/Room&Window.txml
-//!ref: Props/Clouds.txml
-//!ref: Props/Sunset.txml
-//!ref: Props/NightSky.txml
 
 
 engine.ImportExtension("qt.core");
@@ -36,17 +23,32 @@ engine.ImportExtension("qt.gui");
  */
 
 var SceneList_visible = false;
-var PropList_visible = false;
 var BackgroundList_visible = false;
+var PropType_visible = false;
+
+var ElementList_visible = false;
+var ObjectList_visible = false;
+var EffectList_visible = false;
+var ManMadeList_visible = false;
+
 var CurrentClickedItemName = null;
 
-var PropProxy = null;
+var PropTypeProxy = null;
 var SceneProxy = null;
 var BackgroundProxy = null;
+var ElementProxy = null;
+var ObjectProxy = null;
+var ManMadeProxy = null;
+var EffectProxy = null;
 
 var _SceneListWidget = null;
-var _PropListWidget = null;
+//var _PropListWidget = null;
 var _BackgroundListWidget  = null;
+var _ElementListWidget = null;
+var _ObjectListWidget = null;
+var _ManMadeListWidget = null;
+var _EffectListWidget = null;
+
 /*
 Use these to get added properties into right positions. Divided into 3 groups.
 */
@@ -58,7 +60,7 @@ var Objects = ["PalmTrees", "Butterflies", "Mushroom", "Tree1", "Tree2", "Rocks"
 var ManMade = ["Mob", "SnowMan", "SandCastle", "Rocket", "Parasol", "SandToys", "Tombstone", "Pirates", "Car", "Treasure"];
 var SpecialEffects = ["Fire", "Smoke", "FireWorks", "PinkElephant", "BlackMonolith", "UFO", "Hearts"];
 
-
+var PropType = ["Element","Object","ManMade","Effect"];
 
 
 var ScenePos = [
@@ -92,36 +94,39 @@ function Init()
  	
  	var _PropBtn = findChild(_widget, "PropBtn");
 	_PropBtn.pressed.connect(PropBtnClicked);					// listening to the singal of prop button clicked
-	
+
  	var _SceneBtn = findChild(_widget, "SceneBtn");				
 	_SceneBtn.pressed.connect(SceneBtnClicked);					// listening to the singal of SceneBtn button clicked
-	
+
 	var _BackgroundBtn = findChild(_widget, "BackgroundBtn");  
 	_BackgroundBtn.pressed.connect(BackgroundBtnClicked);		// listening to the singal of background button clicked
-	
+
  	var _ClearMenuBtn = findChild(_widget, "ClearMenuBtn");				
 	_ClearMenuBtn.pressed.connect(ClearMenuBtnClicked);			// listering to the singal of clean menu button clicked
-	
+
 	var _ClearEntityBtn = findChild(_widget,"ClearEntityBtn");
 	_ClearEntityBtn.pressed.connect(RemoveAllEntities);		// listering to the singal of clean entity button clicked
+	
+	var _RandomBtn = findChild(_widget,"RandomBtn");
+	//_RandomBtn.pressed.connect(Random);    //TODO  the function Random()
 
 	//Add connects to elements, man made, special effectts and object buttons. 
-	
+
  	var MenuProxy = new UiProxyWidget(_widget);
  
  	ui.AddProxyWidgetToScene(MenuProxy);
     MenuProxy.visible = true;
     MenuProxy.windowFlags = 0;
-	
+
 	MenuProxy.x = 860;
 	MenuProxy.y = 25;
-	
+
 // load the file "Scene.ui"	
 	var _SceneWidget = ui.LoadFromFile("Scripts/Scene.ui", false);
-	
+
     _SceneListWidget = findChild(_SceneWidget, "SceneListWidget");
 	_SceneListWidget.itemDoubleClicked.connect(SceneListItemDoubleClicked);
-	
+
     SceneProxy = new UiProxyWidget(_SceneWidget);
     
     ui.AddProxyWidgetToScene(SceneProxy);
@@ -131,39 +136,168 @@ function Init()
     SceneProxy.x = 965;             // they should be caculated late
     SceneProxy.y = 25;
 
-
-// load the file "Prop.ui"
-	var _PropWidget = ui.LoadFromFile("Scripts/Prop.ui", false);
-	
-	_PropListWidget = findChild(_PropWidget,"PropListWidget");
-	_PropListWidget.itemDoubleClicked.connect(PropListItemDoubleClicked);           // listen to the event of item double clicked in PropListWidget
-	 
-	PropProxy = new UiProxyWidget(_PropWidget);
-	
-	ui.AddProxyWidgetToScene(PropProxy);
-	PropProxy.visible = PropList_visible;
-	PropProxy.windowFlags = 0;
-    
-    PropProxy.x = 965;             // they should be caculated late
-    PropProxy.y = 25;
-	
 // load the file "Background.ui"
 	var _BackgroundWidget = ui.LoadFromFile("Scripts/Background.ui", false);
-	
+
 	_BackgroundListWidget = findChild(_BackgroundWidget,"BackgroundListWidget");
 	_BackgroundListWidget.itemDoubleClicked.connect(BackgroundListItemDoubleClicked);   // listen to the event of item double clicked in BackgroundListWidget
-	
+
 	BackgroundProxy = new UiProxyWidget(_BackgroundWidget);
-	
+
 	ui.AddProxyWidgetToScene(BackgroundProxy);
 	BackgroundProxy.visible = BackgroundList_visible;
 	BackgroundProxy.windowFlags = 0;
     
     BackgroundProxy.x = 965;             // they should be caculated late
     BackgroundProxy.y = 25;
+
+
+
+// load the file "PropType.ui"
+	var _PropTypeWidget = ui.LoadFromFile("Scripts/PropType.ui", false);
+// TODO check the ElementBtnClicked() wehther we can take param in () or not, if it can, then we can use variable(var) replace concrete button name, e.g. varBtnClicked
+// in that case, we just need only one function to deal with the event of button clicked.
+	_ElementBtn = findChild(_PropTypeWidget,"ElementBtn");     
+	_ElementBtn.pressed.connect(ElementBtnClicked); 			// listen to the event of Element button clicked in PropTypeWidget
 	
+	_ObjectBtn = findChild(_PropTypeWidget,"ObjectBtn");
+	_ObjectBtn.pressed.connect(ObjectBtnClicked);				// listen to the event of Object button clicked in PropTypeWidget
 	
+	_ManMadeBtn = findChild(_PropTypeWidget,"ManMadeBtn");
+	_ManMadeBtn.pressed.connect(ManMadeBtnClicked);				// listen to the event of ManMade button clicked in PropTypeWidget
+	
+	_EffectBtn = findChild(_PropTypeWidget,"EffectBtn");
+	_EffectBtn.pressed.connect(EffectBtnClicked);				// listen to the event of Effect button clicked in PropTypeWidget
+	           
+
+	PropTypeProxy = new UiProxyWidget(_PropTypeWidget);
+
+	ui.AddProxyWidgetToScene(PropTypeProxy);
+	PropTypeProxy.visible = PropType_visible;
+	PropTypeProxy.windowFlags = 0;
+    
+    PropTypeProxy.x = 965;             // they should be caculated late
+    PropTypeProxy.y = 25;
+
+
+// load the file "Element.ui"
+	var _ElementWidget = ui.LoadFromFile("Scripts/Element.ui", false);
+
+	_ElementListWidget = findChild(_ElementWidget,"ElementListWidget");
+	_ElementListWidget.itemDoubleClicked.connect(ElementListItemDoubleClicked);           // listen to the event of item double clicked in ElementListWidget
+
+	ElementProxy = new UiProxyWidget(_ElementWidget);
+
+	ui.AddProxyWidgetToScene(ElementProxy);
+	ElementProxy.visible = ElementList_visible;
+	ElementProxy.windowFlags = 0;
+    
+    ElementProxy.x = 965 + 105;             // they should be caculated late
+    ElementProxy.y = 25 + 13;
+
+// load the file "Object.ui"
+	var _ObjectWidget = ui.LoadFromFile("Scripts/Object.ui", false);
+
+	_ObjectListWidget = findChild(_ObjectWidget,"ObjectListWidget");
+	_ObjectListWidget.itemDoubleClicked.connect(ObjectListItemDoubleClicked);           // listen to the event of item double clicked in ObjectListWidget
+
+	ObjectProxy = new UiProxyWidget(_ObjectWidget);
+
+	ui.AddProxyWidgetToScene(ObjectProxy);
+	ObjectProxy.visible = ObjectList_visible;
+	ObjectProxy.windowFlags = 0;
+    
+    ObjectProxy.x = 965 + 105;             // they should be caculated late
+    ObjectProxy.y = 25 + 13 ;
+
+// load the file "ManMade.ui"
+	var _ManMadeWidget = ui.LoadFromFile("Scripts/ManMade.ui", false);
+
+	_ManMadeListWidget = findChild(_ManMadeWidget,"ManMadeListWidget");
+	_ManMadeListWidget.itemDoubleClicked.connect(ManMadeListItemDoubleClicked);           // listen to the event of item double clicked in ManMadeListWidget
+
+	ManMadeProxy = new UiProxyWidget(_ManMadeWidget);
+
+	ui.AddProxyWidgetToScene(ManMadeProxy);
+	ManMadeProxy.visible = ManMadeList_visible;
+	ManMadeProxy.windowFlags = 0;
+    
+    ManMadeProxy.x = 965 + 105;             // they should be caculated late
+    ManMadeProxy.y = 25 + 13 ;
+
+// load the file "Effect.ui"
+	var _EffectWidget = ui.LoadFromFile("Scripts/Effect.ui", false);
+
+	_EffectListWidget = findChild(_EffectWidget,"EffectListWidget");
+	_EffectListWidget.itemDoubleClicked.connect(EffectListItemDoubleClicked);           // listen to the event of item double clicked in EffectListWidget
+
+	EffectProxy = new UiProxyWidget(_EffectWidget);
+
+	ui.AddProxyWidgetToScene(EffectProxy);
+	EffectProxy.visible = EffectList_visible;
+	EffectProxy.windowFlags = 0;
+    
+    EffectProxy.x = 965 + 105;             // they should be caculated late
+    EffectProxy.y = 25 + 13 ;
+
+
 }
+
+	// when scene button and background button are clicked, then it should hide all sub menus of proptype
+   /* function clearPropTypeMenu(){
+		for(var i= 0; i<PropType.length; i++){
+			var tempString = (UiProxyWidget) (PropType[i] + "Proxy");
+			tempString.visible = false;
+		}
+		
+	}*/
+	
+	function clearPropTypeMenu(){
+		ElementProxy.visible = false;
+		ObjectProxy.visible = false;
+		ManMadeProxy.visible = false;
+		EffectProxy.visible = false;
+		
+	}
+	// when one of proptype menus clicked, others should be hidden. 
+	/*function clearPropTypeSubMenu(btnName){
+		for(var i=0; i<PropType.length; i++){
+			if(PropType[i] != btnName)
+			{
+				var tempString = UiProxyWidget(PropType[i] + "Proxy");
+				tempString.visible = false; 
+			}
+			else{
+				var tempS = (UiProxyWidget)(PropType[i] + "Proxy");
+				tempS.visible = true;
+			}
+		}
+	
+	}*/
+	function clearPropTypeSubMenu(btnName){
+		if(btnName == "Element"){
+			ElementProxy.visible = true;
+			ObjectProxy.visible = false;
+			ManMadeProxy.visible = false;
+			EffectProxy.visible = false;
+		}else if (btnName == "Object"){
+			ElementProxy.visible = false;
+			ObjectProxy.visible = true;
+			ManMadeProxy.visible = false;
+			EffectProxy.visible = false;
+		}else if (btnName == "ManMade"){
+			ElementProxy.visible = false;
+			ObjectProxy.visible = false;
+			ManMadeProxy.visible = true;
+			EffectProxy.visible = false;
+		}else if(btnName == "Effect"){
+			ElementProxy.visible = false;
+			ObjectProxy.visible = false;
+			ManMadeProxy.visible = false;
+			EffectProxy.visible = true;
+		}
+		
+	}
 
 /*
  *  handle the mouse event occur on submenu (scene, prop, background, clear).
@@ -174,45 +308,84 @@ function Init()
       _SceneListWidget.clear();
       for(i = 0; i < Scenes.length; i++){
         _SceneListWidget.addItem(Scenes[i]);
-      
       }
-     
-			SceneProxy.visible = true;
-			
-			PropProxy.visible = ! SceneProxy.visible;
-			BackgroundProxy.visible = ! SceneProxy.visible;
+	  SceneProxy.visible = true;
+	  PropTypeProxy.visible = ! SceneProxy.visible;
+	  clearPropTypeMenu();
+	  BackgroundProxy.visible = ! SceneProxy.visible;
 	}
 	
-	
+	function PropBtnClicked(){
+	  PropTypeProxy.visible= true;
+	  SceneProxy.visible = ! PropTypeProxy.visible;
+	  BackgroundProxy.visible = ! PropTypeProxy.visible;
+	}
 
-  function PropBtnClicked(){
-    /*
-    add new menu opening
-    */
+    function ElementBtnClicked(){
+	  _ElementListWidget.clear();
+      for(i = 0; i < Elements.length; i++){
+        _ElementListWidget.addItem(Elements[i]);
+      }
+	  ElementProxy.visible = true;
+	  SceneProxy.visible = ! ElementProxy.visible;
+	  BackgroundProxy.visible = ! ElementProxy.visible;
+	  clearPropTypeSubMenu("Element");
 	}
 	
-
+	function ObjectBtnClicked(){
+	  _ObjectListWidget.clear();
+      for(i = 0; i < Objects.length; i++){
+        _ObjectListWidget.addItem(Objects[i]);
+      }
+	  ObjectProxy.visible = true;
+	  SceneProxy.visible = ! ObjectProxy.visible;
+	  BackgroundProxy.visible = ! ObjectProxy.visible;
+	  clearPropTypeSubMenu("Object");
+	}
+	
+	function ManMadeBtnClicked(){
+	  _ManMadeListWidget.clear();
+      for(i = 0; i < ManMade.length; i++){
+        _ManMadeListWidget.addItem(ManMade[i]);
+      }
+	  ManMadeProxy.visible = true;
+	  SceneProxy.visible = ! ManMadeProxy.visible;
+	  BackgroundProxy.visible = ! ManMadeProxy.visible;
+	  clearPropTypeSubMenu("ManMade");
+	}
+	
+	function EffectBtnClicked(){
+	  _EffectListWidget.clear();
+      for(i = 0; i < SpecialEffects.length; i++){
+        _EffectListWidget.addItem(SpecialEffects[i]);
+      }
+	  EffectProxy.visible = true;
+	  SceneProxy.visible = ! EffectProxy.visible;
+	  BackgroundProxy.visible = ! EffectProxy.visible;
+	  clearPropTypeSubMenu("Effect");
+	}
+	
 	function BackgroundBtnClicked(){
       console.LogInfo(_BackgroundListWidget);
-			_BackgroundListWidget.clear();
-			for(i = 0; i < Backgrounds.length; i++){
-        _BackgroundListWidget.addItem(Backgrounds[i]);
-			
-			}
-			BackgroundProxy.visible  = true;
-			
-			SceneProxy.visible = ! BackgroundProxy.visible;
-			PropProxy.visible = ! BackgroundProxy.visible;
+	  _BackgroundListWidget.clear();
+	  for(i = 0; i < Backgrounds.length; i++){
+      _BackgroundListWidget.addItem(Backgrounds[i]);
+	  }
+	  BackgroundProxy.visible  = true;
+	  SceneProxy.visible = ! BackgroundProxy.visible;
+ 	  PropTypeProxy.visible = ! BackgroundProxy.visible;
+	  clearPropTypeMenu();
 	}
 
 	function ClearMenuBtnClicked(){
-		
+
 		SceneProxy.visible = false;
-		PropProxy.visible = false;
+		PropTypeProxy.visible = false;
 		BackgroundProxy.visible = false;
+		clearPropTypeMenu();
 	}
  	
-	
+
 
 
 
@@ -233,27 +406,52 @@ function Init()
 		LoadXML(CurrentClickedItemName, type);
 	}
 	
+	function BackgroundListItemDoubleClicked (){
+		CurrentClickedItemName = _BackgroundListWidget.currentItem().text();
+		console.LogInfo(_BackgroundListWidget.objectName);
+		console.LogInfo("CurrentClicked        BackgroundListItem: " + CurrentClickedItemName);
+		LoadXML(CurrentClickedItemName);
+	}
+   /*
   //Replace with ElementlistDoubleClicked()
 	function PropListItemDoubleClicked (){
 		CurrentClickedItemName = _PropListWidget.currentItem().text();
 		console.LogInfo(_PropListWidget.objectName);
 		console.LogInfo("CurrentClicked        PropListItem: " + CurrentClickedItemName);
 		LoadXML(CurrentClickedItemName);
-	
-		
 	}
-	
-	function BackgroundListItemDoubleClicked (){
-    
-    
-    
-		CurrentClickedItemName = _BackgroundListWidget.currentItem().text();
-		console.LogInfo(_BackgroundListWidget.objectName);
-		console.LogInfo("CurrentClicked        BackgroundListItem: " + CurrentClickedItemName);
-		
+	*/
+	function ElementListItemDoubleClicked () {
+		CurrentClickedItemName = _ElementListWidget.currentItem().text();
+		console.LogInfo(_ElementListWidget.objectName);
+		console.LogInfo("CurrentClicked        ElementListItem: " + CurrentClickedItemName);
 		LoadXML(CurrentClickedItemName);
 	}
 	
+	function ObjectListItemDoubleClicked () {
+		CurrentClickedItemName = _ObjectListWidget.currentItem().text();
+		console.LogInfo(_ObjectListWidget.objectName);
+		console.LogInfo("CurrentClicked        ObjectListItem: " + CurrentClickedItemName);
+		LoadXML(CurrentClickedItemName);
+	}
+
+	function ManMadeListItemDoubleClicked () {
+		CurrentClickedItemName = _ManMadeListWidget.currentItem().text();
+		console.LogInfo(_ManMadeListWidget.objectName);
+		console.LogInfo("CurrentClicked        ManMadeListItem: " + CurrentClickedItemName);
+		LoadXML(CurrentClickedItemName);	
+	}
+	
+	function EffectListItemDoubleClicked () {
+		CurrentClickedItemName = _EffectListWidget.currentItem().text();
+		console.LogInfo(_EffectListWidget.objectName);
+		console.LogInfo("CurrentClicked        EffectListItem: " + CurrentClickedItemName);
+		LoadXML(CurrentClickedItemName);
+	}	
+
+
+	
+
 /*
 This function is launched if the new added entity has an animationcontroller. If the entity has no animations, we wait and let tundra load them.
 After that we launch EnableAnims, which activates animations.
@@ -296,6 +494,7 @@ function LoadXML (text){
     var assets = scene.LoadSceneXML(asset.GetAsset("Props/" + text + ".txml").DiskSource(), false, false, 0);
     var ent = assets[0];
     var id = assets[0].id;
+	console.LogInfo(ent.name, ent, assets[0].name);
     ent.placeable.visible = false;
     ent.dynamiccomponent.CreateAttribute('bool', 'Placed');
     if(!ent.animationcontroller && ent.dynamiccomponent.GetAttribute('Placed') == false)
@@ -306,7 +505,7 @@ function LoadXML (text){
 }
 
 
-			  
+
 function CheckPlacement(ent){
 			  //CASE1: Entity has no animations and is not placed yet. We place it and set placed to true, depending on if its prop, scene or background. 
 			  //TODO: An array for multiple different locations that the entity can be added in.
@@ -356,7 +555,7 @@ function CheckPlacement(ent){
           }
             
 }
-		
+
 function EnableAnims(ent){
   for(i=0; i<ent.length; i++){
   
@@ -421,7 +620,7 @@ function EnableAnims(ent){
 }
 
 			   //print('text doesnt exist.', text, tempArray[i]);
-		 
+
  
   
   
