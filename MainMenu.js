@@ -108,7 +108,7 @@ function Init()
 	_ClearEntityBtn.pressed.connect(RemoveAllEntities);		// listering to the singal of clean entity button clicked
 	
 	var _RandomBtn = findChild(_widget,"RandomBtn");
-	//_RandomBtn.pressed.connect(Random);    //TODO  the function Random()
+	_RandomBtn.pressed.connect(RandomButtonClicked);    //TODO  the function Random()
 
 	//Add connects to elements, man made, special effectts and object buttons. 
 
@@ -383,6 +383,17 @@ function Init()
 		PropTypeProxy.visible = false;
 		BackgroundProxy.visible = false;
 		clearPropTypeMenu();
+	}
+	
+	function RandomButtonClicked(){
+		var randomArray = [Elements, Objects, Backgrounds, Scenes, ManMade, SpecialEffects];
+		var idx = rnd(randomArray.length);
+		var rndtype = randomArray[idx];
+		var entidx = rnd(rndtype.length);
+		var ent = randomArray[idx][entidx];
+		//var ent = rndtype [entidx];
+		LoadXML(ent);
+		
 	}
  	
 
