@@ -49,12 +49,13 @@ function CreateRefFile()
      
 } 
 
+CreaterRefFile();
 
 </script>
 </head>
 
 <body>
-<input type="button" value="CreateRefFile" onclick="CreateRefFile()">
+
 </body>
 </html>
 
