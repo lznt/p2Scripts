@@ -21,7 +21,8 @@
   </property>
   <property name="styleSheet">
    <string notr="true">QWidget#MainMenu { background-color: transparent; }
-QFrame#frame { background-color: rgba(136, 136, 136, 200); border-radius: 12px;}
+QFrame#frame { background-color: rgba(33, 217, 229, 200);
+ border-radius: 12px;}
 </string>
   </property>
   <widget class="QFrame" name="frame">
@@ -42,24 +43,30 @@ QFrame#frame { background-color: rgba(136, 136, 136, 200); border-radius: 12px;}
    <widget class="QPushButton" name="BackgroundBtn">
     <property name="geometry">
      <rect>
-      <x>14</x>
-      <y>84</y>
-      <width>75</width>
-      <height>20</height>
+      <x>5</x>
+      <y>18</y>
+      <width>93</width>
+      <height>30</height>
      </rect>
     </property>
     <property name="mouseTracking">
      <bool>true</bool>
     </property>
     <property name="text">
-     <string>Background</string>
+     <string>BackGround</string>
+    </property>
+    <property name="iconSize">
+     <size>
+      <width>16</width>
+      <height>16</height>
+     </size>
     </property>
    </widget>
    <widget class="QPushButton" name="PropBtn">
     <property name="geometry">
      <rect>
-      <x>14</x>
-      <y>53</y>
+      <x>13</x>
+      <y>80</y>
       <width>75</width>
       <height>20</height>
      </rect>
@@ -68,14 +75,14 @@ QFrame#frame { background-color: rgba(136, 136, 136, 200); border-radius: 12px;}
      <bool>true</bool>
     </property>
     <property name="text">
-     <string>Prop</string>
+     <string>PROPS</string>
     </property>
    </widget>
    <widget class="QPushButton" name="SceneBtn">
     <property name="geometry">
      <rect>
       <x>14</x>
-      <y>21</y>
+      <y>49</y>
       <width>75</width>
       <height>20</height>
      </rect>
@@ -87,7 +94,7 @@ QFrame#frame { background-color: rgba(136, 136, 136, 200); border-radius: 12px;}
      <string notr="true"/>
     </property>
     <property name="text">
-     <string>Scene</string>
+     <string>SCENE</string>
     </property>
    </widget>
    <widget class="QPushButton" name="ClearMenuBtn">

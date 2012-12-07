@@ -46,10 +46,10 @@ Use these to get added properties into right positions. Divided into 3 groups.
 
 var Scenes = ["Winter", "Mountains", "Meadow", "Forest", "City", "Beach", "Room"];
 var Backgrounds = ["NightSky", "DaySky", "Sunset"];
-var Elements =["Clouds", "Sun", "Moon", "Volcano"];
-var Objects = ["PalmTrees", "Butterflies", "Walrus"];
-var ManMade = ["Rocket", "SandToys", "Tombstone", "Treasure"];
-var SpecialEffects = ["UFO"];
+var Elements =["Clouds", "Sun", "Moon", "Rainbow", "SnowFlakes", "Rain", "Volcano"];
+var Objects = ["PalmTrees", "Butterflies", "Mushroom", "Tree1", "Tree2", "Rocks", "Walrus", "Bunnies"];
+var ManMade = ["Mob", "SnowMan", "SandCastle", "Rocket", "Parasol", "SandToys", "Tombstone", "Pirates", "Car", "Treasure"];
+var SpecialEffects = ["Fire", "Smoke", "FireWorks", "PinkElephant", "BlackMonolith", "UFO", "Hearts"];
 
 var PropType = ["Element","Object","ManMade","Effect"];
 
@@ -645,7 +645,7 @@ function RemoveAllEntities(){
 
 
 
-/*
+
 // this function fits the URL, 
 function getCurrentDirectory(fileName)
 {
@@ -663,19 +663,17 @@ syspath = syspath + fileName; // get the full name of file path (incldes file na
 
 return syspath.toString();
 }
-*/
+
 function CreateRefFile() 
 { 
     var fso, tf; 
     fso = new ActiveXObject("Scripting.FileSystemObject"); 
-	//var	pathName = getCurrentDirectory(fileName);
-	var pathName = "local://Ref.js";
-    tf = fso.OpenTextFile(pathName); 
+	var	pathName = getCurrentDirectory(fileName);
+    tf = fso.CreateTextFile(pathName, true); 
 	for(var i=0; i<AllEffect.length; i++)
 	{
 		for(var j=0; j<AllEffect[i].length; j++)
 		{
-			print(AllEffect[i][j]);
 			tf.WriteLine("//!ref: Props/"+ AllEffect[i][j] +".txml");
 		}
 	}
@@ -698,7 +696,7 @@ if (server.IsRunning()){
 }
 else{
     CreateRefFile();
-	engine.IncludeFile("local://Ref.js");
+	engine.IncludeFile("local://RefFiles.js");
    Init();
    print('Init');
 }

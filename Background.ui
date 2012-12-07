@@ -15,7 +15,8 @@
   </property>
   <property name="styleSheet">
    <string notr="true">QWidget#Background { background-color: transparent; }
-QFrame#frame { background-color: rgba(136, 136, 136, 200); border-radius: 12px;}
+QFrame#frame { background-color: rgba(33, 217, 229, 200);
+ border-radius: 12px;}
 </string>
   </property>
   <widget class="QFrame" name="frame">
@@ -28,8 +29,7 @@ QFrame#frame { background-color: rgba(136, 136, 136, 200); border-radius: 12px;}
     </rect>
    </property>
    <property name="styleSheet">
-    <string notr="true">QWidget#Background{ background-color: transparent;}
-QFrame#frame{ background-color: rgba(136, 136, 136, 200); border-radius: 15px; }</string>
+    <string notr="true"/>
    </property>
    <property name="frameShape">
     <enum>QFrame::StyledPanel</enum>

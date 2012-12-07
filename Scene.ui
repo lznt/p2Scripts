@@ -18,7 +18,8 @@
   </property>
   <property name="styleSheet">
    <string notr="true">QWidget#Scene{ background-color: transparent;}
-QFrame#frame{ background-color: rgba(136, 136, 136, 200); border-radius: 15px; }</string>
+QFrame#frame { background-color: rgba(33, 217, 229, 200);
+ border-radius: 12px;}</string>
   </property>
   <widget class="QFrame" name="frame">
    <property name="geometry">
