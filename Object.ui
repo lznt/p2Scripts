@@ -18,7 +18,7 @@
   </property>
   <property name="styleSheet">
    <string notr="true">QWidget#Object{ background-color: transparent;}
-QFrame#frame { background-color: rgba(36,217,87,200);
+QFrame#frame { background-color: rgba(36,217,87,150);
  border-radius: 12px;}</string>
   </property>
   <widget class="QFrame" name="frame">
