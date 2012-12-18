@@ -2,9 +2,6 @@
 <ui version="4.0">
  <class>ConnectDialog</class>
  <widget class="QWidget" name="ConnectDialog">
-  <property name="windowModality">
-   <enum>Qt::NonModal</enum>
-  </property>
   <property name="geometry">
    <rect>
     <x>0</x>
@@ -13,19 +10,13 @@
     <height>202</height>
    </rect>
   </property>
-  <property name="windowTitle">
-   <string>Connection Information</string>
-  </property>
-  <property name="windowOpacity">
-   <double>1.000000000000000</double>
+  <property name="acceptDrops">
+   <bool>true</bool>
   </property>
   <property name="styleSheet">
-   <string notr="true">/*
+   <string notr="true">
 QWidget#ConnectDialog { background-color: transparent; }
-QFrame#frame { background-color: rgba(136, 136, 136, 200); border-radius: 12px;}*/</string>
-  </property>
-  <property name="windowFilePath">
-   <string/>
+QFrame#frame { background-color: rgba(33, 217, 229,200); border-radius: 12px;}</string>
   </property>
   <widget class="QFrame" name="frame">
    <property name="geometry">

@@ -11,6 +11,7 @@ var SpecialEffects = ["Fire", "Smoke", "FireWorks", "PinkElephant", "BlackMonoli
 
 var Prop = [Scenes,Backgrounds,Elements,Objects,ManMade,SpecialEffects];
 
+/*
 var fileName = "/Ref.js";
 
 // this function fits the URL, 
@@ -30,13 +31,16 @@ syspath = syspath + fileName; // get the full name of file path (incldes file na
 
 return syspath.toString();
 }
-
+*/
 function CreateRefFile() 
 { 
     var fso, tf; 
     fso = new ActiveXObject("Scripting.FileSystemObject"); 
-	var	pathName = getCurrentDirectory(fileName);
-    tf = fso.CreateTextFile(pathName, true); 
+	//var	pathName = getCurrentDirectory(fileName);
+	//var pathName = "local://Ref.js";
+	var pathName = "C:\p2\p2Scripts\Ref.js"
+    //tf = fso.CreateTextFile(pathName, true); 
+	tf = fso.CreateTextFile(pathName,true);
 	for(var i=0; i<Prop.length; i++)
 	{
 		for(var j=0; j<Prop[i].length; j++)

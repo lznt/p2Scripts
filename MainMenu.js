@@ -1,6 +1,6 @@
 
-
-
+engine.IncludeFile("local://RefFiles.js");
+engine.IncludeFile("local://MumbleFunc.js");
 
 engine.ImportExtension("qt.core");
 engine.ImportExtension("qt.gui");
@@ -22,6 +22,9 @@ var ObjectList_visible = false;
 var EffectList_visible = false;
 var ManMadeList_visible = false;
 
+var MumbleClientProxy_visible = false;
+var MumbleConnectProxy_visible = false;
+
 var CurrentClickedItemName = null;
 
 var PropTypeProxy = null;
@@ -32,13 +35,43 @@ var ObjectProxy = null;
 var ManMadeProxy = null;
 var EffectProxy = null;
 
+var MumbleProxy = null;
+var MumbleClientProxy = null;
+var MumbleConnectProxy = null;
+
 var _SceneListWidget = null;
-//var _PropListWidget = null;
 var _BackgroundListWidget  = null;
 var _ElementListWidget = null;
 var _ObjectListWidget = null;
 var _ManMadeListWidget = null;
 var _EffectListWidget = null;
+
+
+var _mumbleClientWidget = null;
+var _mumbleConnectWidget = null;
+
+var _buttonConnect = null;
+var	_buttonDisconnect = null;
+var	_buttonWizard = null;
+var	_buttonSelfMute = null;
+var	_buttonSelfDeaf = null;
+var	_userList = null;
+
+//------------mumble /variable----begin-------------//
+var _connectionInfo =
+{
+    host      : "athena.mumble-serveur.com",    // Change to IP if you want to test remote Murmur servers.
+    port      : 13501,          // Default port for Murmur, see murmur.ini for changing this.
+    password  : "e92ds6gs",             // Default password for Murmur is empty, see murmur.ini for changing this.
+    channel   : "mumble-serveur.com public #1",             // Default Murmur server will have one channel called "Root". Empty channel name is depicted as "Root" when connecting via MumblePlugin.
+    outputMuted : false,        // True means your voice is sent after connecting, false means your output is muted.
+    intputMuted : false         // True means voice should be sent to us from other client after connecting, false means server wont send us the voice packets.
+};
+
+
+
+//------------mumble /variable ----- end ------------//
+
 
 /*
 Use these to get added properties into right positions. Divided into 3 groups.
@@ -46,15 +79,13 @@ Use these to get added properties into right positions. Divided into 3 groups.
 
 var Scenes = ["Winter", "Mountains", "Meadow", "Forest", "City", "Beach", "Room"];
 var Backgrounds = ["NightSky", "DaySky", "Sunset"];
-var Elements =["Clouds", "Sun", "Moon", "Volcano"];
-var Objects = ["PalmTrees", "Butterflies", "Walrus"];
-var ManMade = ["Rocket", "SandToys", "Tombstone", "Treasure"];
-var SpecialEffects = ["UFO"];
+var Elements =["Clouds", "Sun", "Moon", "Rainbow", "SnowFlakes", "Rain", "Volcano"];
+var Objects = ["PalmTrees", "Butterflies", "Mushroom", "Tree1", "Tree2", "Rocks", "Walrus", "Bunnies"];
+var ManMade = ["Mob", "SnowMan", "SandCastle", "Rocket", "Parasol", "SandToys", "Tombstone", "Pirates", "Car", "Treasure"];
+var SpecialEffects = ["Fire", "Smoke", "FireWorks", "PinkElephant", "BlackMonolith", "UFO", "Hearts"];
 
 var PropType = ["Element","Object","ManMade","Effect"];
 
-var AllEffect = [Scenes,Backgrounds,Elements,Objects,ManMade,SpecialEffects];
-var fileName = "/Ref.js";
 
 var ScenePos = [
 position1 = {x : -53.98, y: 10.25, z: -73.77},
@@ -82,8 +113,28 @@ this.Positions = [ScenePos, GroundPropPos, SkyPropPos, BackgPos];
 
 function Init()
 {
+//	---------------------------- Hook to MumblePlugin  / start ---------------------------------//
+	 
+		mumble.Connected.connect(OnConnected);
+		mumble.Disconnected.connect(OnDisconnected);
+		mumble.ConnectionRejected.connect(OnRejected);
+	
+		mumble.MeCreated.connect(OnMeCreated);
+		mumble.JoinedChannel.connect(OnJoinedChannel);
+	
+		mumble.UserMuted.connect(OnUserLocalMuteChanged);
+		mumble.UserSelfMuted.connect(OnUserSelfMutedChange);
+		mumble.UserSelfDeaf.connect(OnUserSelfDeafChange);
+		mumble.UserSpeaking.connect(OnUserSpeakingChange);
+		mumble.UserPositionalChanged.connect(OnUserPositionalChange);
+		mumble.ChannelTextMessageReceived.connect(OnChannelTextMessageReceived);
+		
+//	---------------------------- Hook to MumblePlugin  / end ---------------------------------//
+		
+		
+		
 // load the file "MainMenu.ui"   
- 	var _widget = ui.LoadFromFile("Scripts/MainMenu.ui", false);
+ 	var _widget = ui.LoadFromFile("Scripts/MainMenu.ui",false);
  	
  	var _PropBtn = findChild(_widget, "PropBtn");
 	_PropBtn.pressed.connect(PropBtnClicked);					// listening to the singal of prop button clicked
@@ -101,8 +152,10 @@ function Init()
 	_ClearEntityBtn.pressed.connect(RemoveAllEntities);		// listering to the singal of clean entity button clicked
 	
 	var _RandomBtn = findChild(_widget,"RandomBtn");
-	_RandomBtn.pressed.connect(RandomButtonClicked);    //TODO  the function Random()
-
+	_RandomBtn.pressed.connect(RandomButtonClicked);    
+	
+	var _MumbleBtn = findChild(_widget,"MumbleBtn")
+	_MumbleBtn.pressed.connect(MumbleBtnClicked);
 	//Add connects to elements, man made, special effectts and object buttons. 
 
  	var MenuProxy = new UiProxyWidget(_widget);
@@ -113,6 +166,7 @@ function Init()
 
 	MenuProxy.x = 860;
 	MenuProxy.y = 25;
+
 
 // load the file "Scene.ui"	
 	var _SceneWidget = ui.LoadFromFile("Scripts/Scene.ui", false);
@@ -126,7 +180,7 @@ function Init()
     SceneProxy.visible = SceneList_visible;   // set the SceneList_visibe = false;
     SceneProxy.windowFlags = 0;
     
-    SceneProxy.x = 965;             // they should be caculated late
+    SceneProxy.x = 965;             
     SceneProxy.y = 25;
 
 // load the file "Background.ui"
@@ -141,15 +195,14 @@ function Init()
 	BackgroundProxy.visible = BackgroundList_visible;
 	BackgroundProxy.windowFlags = 0;
     
-    BackgroundProxy.x = 965;             // they should be caculated late
+    BackgroundProxy.x = 965;            
     BackgroundProxy.y = 25;
 
 
 
 // load the file "PropType.ui"
 	var _PropTypeWidget = ui.LoadFromFile("Scripts/PropType.ui", false);
-// TODO check the ElementBtnClicked() wehther we can take param in () or not, if it can, then we can use variable(var) replace concrete button name, e.g. varBtnClicked
-// in that case, we just need only one function to deal with the event of button clicked.
+
 	_ElementBtn = findChild(_PropTypeWidget,"ElementBtn");     
 	_ElementBtn.pressed.connect(ElementBtnClicked); 			// listen to the event of Element button clicked in PropTypeWidget
 	
@@ -169,7 +222,7 @@ function Init()
 	PropTypeProxy.visible = PropType_visible;
 	PropTypeProxy.windowFlags = 0;
     
-    PropTypeProxy.x = 965;             // they should be caculated late
+    PropTypeProxy.x = 965;            
     PropTypeProxy.y = 25;
 
 
@@ -185,7 +238,7 @@ function Init()
 	ElementProxy.visible = ElementList_visible;
 	ElementProxy.windowFlags = 0;
     
-    ElementProxy.x = 965 + 105;             // they should be caculated late
+    ElementProxy.x = 965 + 105;             
     ElementProxy.y = 25 + 13;
 
 // load the file "Object.ui"
@@ -200,7 +253,7 @@ function Init()
 	ObjectProxy.visible = ObjectList_visible;
 	ObjectProxy.windowFlags = 0;
     
-    ObjectProxy.x = 965 + 105;             // they should be caculated late
+    ObjectProxy.x = 965 + 105;             
     ObjectProxy.y = 25 + 13 ;
 
 // load the file "ManMade.ui"
@@ -215,7 +268,7 @@ function Init()
 	ManMadeProxy.visible = ManMadeList_visible;
 	ManMadeProxy.windowFlags = 0;
     
-    ManMadeProxy.x = 965 + 105;             // they should be caculated late
+    ManMadeProxy.x = 965 + 105;            
     ManMadeProxy.y = 25 + 13 ;
 
 // load the file "Effect.ui"
@@ -230,11 +283,63 @@ function Init()
 	EffectProxy.visible = EffectList_visible;
 	EffectProxy.windowFlags = 0;
     
-    EffectProxy.x = 965 + 105;             // they should be caculated late
+    EffectProxy.x = 965 + 105;             
     EffectProxy.y = 25 + 13 ;
 
 
+// --------------------------------------------------- mumble /widget---- --- begin ------------------------------------------//
+// load the file "StartMumble.ui and add it into the scene"
+	var _mumbleWidget = ui.LoadFromFile("Scripts/StartMumble.ui",false);
+	var _MumbleBtn = findChild(_mumbleWidget,"MumbleBtn");
+//	 when the mumble button clicked, the mumble client GUI will be shown in the scene
+	_MumbleBtn.pressed.connect(MumbleBtnClicked);
+	
+	var MumbleProxy = new UiProxyWidget(_mumbleWidget);
+	ui.AddProxyWidgetToScene(MumbleProxy);
+//	 set the default value of visible as  true;
+	MumbleProxy.visible = true;
+	MumbleProxy.windowFlags = 0;
+	MumbleProxy.x = 1;
+	MumbleProxy.y = 0;
+
+
+	
+	_mumbleClientWidget = ui.LoadFromFile("Scripts/MumbleClientWidget.ui",false);
+	MumbleClientProxy = new UiProxyWidget(_mumbleClientWidget);
+	
+	
+		_buttonConnect = findChild(_mumbleClientWidget,"buttonOpenConnect");
+		_buttonConnect.clicked.connect(ShowConnectDialog);
+	
+	    _buttonDisconnect = findChild(_mumbleClientWidget, "buttonDisconnect");
+		_buttonDisconnect.clicked.connect(mumble, mumble.Disconnect); // Direct connection to MumblePlugin C++ QObject
+	
+		_buttonWizard = findChild(_mumbleClientWidget, "buttonOpenWizard");
+		_buttonWizard.clicked.connect(mumble, mumble.RunAudioWizard); // Direct connection to MumblePlugin C++ QObject
+	
+		_buttonSelfMute = findChild(_mumbleClientWidget, "muteSelfToggle");
+		_buttonSelfMute.clicked.connect(OnSelfMuteToggle);
+	
+		_buttonSelfDeaf = findChild(_mumbleClientWidget, "deafSelfToggle");
+		_buttonSelfDeaf.clicked.connect(OnSelfDeafToggle);
+		
+		_userList = findChild(_mumbleClientWidget, "listUsers");
+	
+	ui.AddProxyWidgetToScene(MumbleClientProxy);
+	MumbleClientProxy.visible = MumbleClientProxy_visible;
+	MumbleClientProxy.windowFlags = 0;
+	MumbleClientProxy.x = 2;
+	MumbleClientProxy.y = 42;
+	
+	
+	
+//------------------------------------------------- mumble /widget-------------end ------------------------------//
+	
 }
+
+
+
+
 
 	// when scene button and background button are clicked, then it should hide all sub menus of proptype
    /* function clearPropTypeMenu(){
@@ -252,45 +357,56 @@ function Init()
 		EffectProxy.visible = false;
 		
 	}
-	// when one of proptype menus clicked, others should be hidden. 
-	/*function clearPropTypeSubMenu(btnName){
-		for(var i=0; i<PropType.length; i++){
-			if(PropType[i] != btnName)
-			{
-				var tempString = UiProxyWidget(PropType[i] + "Proxy");
-				tempString.visible = false; 
-			}
-			else{
-				var tempS = (UiProxyWidget)(PropType[i] + "Proxy");
-				tempS.visible = true;
-			}
-		}
 	
-	}*/
-	function clearPropTypeSubMenu(btnName){
-		if(btnName == "Element"){
-			ElementProxy.visible = true;
-			ObjectProxy.visible = false;
-			ManMadeProxy.visible = false;
-			EffectProxy.visible = false;
-		}else if (btnName == "Object"){
-			ElementProxy.visible = false;
-			ObjectProxy.visible = true;
-			ManMadeProxy.visible = false;
-			EffectProxy.visible = false;
-		}else if (btnName == "ManMade"){
-			ElementProxy.visible = false;
-			ObjectProxy.visible = false;
-			ManMadeProxy.visible = true;
-			EffectProxy.visible = false;
-		}else if(btnName == "Effect"){
-			ElementProxy.visible = false;
-			ObjectProxy.visible = false;
-			ManMadeProxy.visible = false;
-			EffectProxy.visible = true;
-		}
+	
+// ---------------------------------------------------------- mumble / functions----------------begin-------------------------------//	
+	
+	
+
+
+
+	
+// --------------------------------------------------- mumble /functions ------------------end --------------------------//
+	
+		// when one of proptype menus clicked, others should be hidden. 
+		/*function clearPropTypeSubMenu(btnName){
+			for(var i=0; i<PropType.length; i++){
+				if(PropType[i] != btnName)
+				{
+					var tempString = UiProxyWidget(PropType[i] + "Proxy");
+					tempString.visible = false; 
+				}
+				else{
+					var tempS = (UiProxyWidget)(PropType[i] + "Proxy");
+					tempS.visible = true;
+				}
+			}
 		
-	}
+		}*/
+		function clearPropTypeSubMenu(btnName){
+			if(btnName == "Element"){
+				ElementProxy.visible = true;
+				ObjectProxy.visible = false;
+				ManMadeProxy.visible = false;
+				EffectProxy.visible = false;
+			}else if (btnName == "Object"){
+				ElementProxy.visible = false;
+				ObjectProxy.visible = true;
+				ManMadeProxy.visible = false;
+				EffectProxy.visible = false;
+			}else if (btnName == "ManMade"){
+				ElementProxy.visible = false;
+				ObjectProxy.visible = false;
+				ManMadeProxy.visible = true;
+				EffectProxy.visible = false;
+			}else if(btnName == "Effect"){
+				ElementProxy.visible = false;
+				ObjectProxy.visible = false;
+				ManMadeProxy.visible = false;
+				EffectProxy.visible = true;
+			}
+			
+		}
 
 /*
  *  handle the mouse event occur on submenu (scene, prop, background, clear).
@@ -480,8 +596,24 @@ function rnd(n){
   return (Math.floor((seed/(233280.0)* n)));
 }
 
-function LoadXML (text){
+function NarratorAnim(){
+  /*
+  Function for randoming narrators animations
+  */
+  var nar = scene.GetEntityByName('narrator');
+  var a = nar.animationcontroller.GetAvailableAnimations();
+    
+  if(a.length < 0)
+    console.LogInfo('No animations yet');
+  else{
+    var idx = rnd(a.length);
+    nar.animationcontroller.EnableAnimation(a[idx], false);
+  }
+  
+}
 
+function LoadXML (text){
+  NarratorAnim();
   /*
   effectArray holds all possible props, scenes or backgrounds that can be added into the 3d world with GUI. The name in array has to be exact same as 
   the name of the file in /Props/ folder. variable text is GUI's text of chosen button and is used to compare. Use the table made my Tomi & Paula to get
@@ -645,46 +777,6 @@ function RemoveAllEntities(){
 
 
 
-/*
-// this function fits the URL, 
-function getCurrentDirectory(fileName)
-{
-var syspath = location.href; 
-syspath = syspath.toLowerCase();      
-myPosition = syspath.lastIndexOf("/");  // get the last character of "/" in the file path
-
-syspath = syspath.substring(0,parseInt(myPosition)+1); //  get the string before the last character of "/"  
-
-syspath = syspath.replace("file:///","");  // replace the "file:///" with space character
-
-syspath = syspath.replace(new RegExp("%20","gm")," ");   // the space in the URL, it appear in the format of "%20", but the path of computure should use  space character, 
-
-syspath = syspath + fileName; // get the full name of file path (incldes file name)
-
-return syspath.toString();
-}
-*/
-function CreateRefFile() 
-{ 
-    var fso, tf; 
-    fso = new ActiveXObject("Scripting.FileSystemObject"); 
-	//var	pathName = getCurrentDirectory(fileName);
-	var pathName = "local://Ref.js";
-    tf = fso.OpenTextFile(pathName); 
-	for(var i=0; i<AllEffect.length; i++)
-	{
-		for(var j=0; j<AllEffect[i].length; j++)
-		{
-			print(AllEffect[i][j]);
-			tf.WriteLine("//!ref: Props/"+ AllEffect[i][j] +".txml");
-		}
-	}
-    
-    tf.Close();
-     
-} 
-
-
 // destory the widget and stop the script running
 function OnScriptdestroyed() {
 	_widget.deleteLater();
@@ -697,8 +789,7 @@ if (server.IsRunning()){
   console.LogInfo("server is running");
 }
 else{
-    CreateRefFile();
-	engine.IncludeFile("local://Ref.js");
+    
    Init();
    print('Init');
 }
