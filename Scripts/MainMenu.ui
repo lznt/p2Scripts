@@ -7,7 +7,7 @@
     <x>0</x>
     <y>0</y>
     <width>103</width>
-    <height>242</height>
+    <height>212</height>
    </rect>
   </property>
   <property name="mouseTracking">
@@ -109,7 +109,7 @@ font:bold;
      <x>2</x>
      <y>1</y>
      <width>101</width>
-     <height>241</height>
+     <height>211</height>
     </rect>
    </property>
    <property name="frameShape">
@@ -233,25 +233,6 @@ font:bold;
     </property>
     <property name="text">
      <string>Random</string>
-    </property>
-   </widget>
-   <widget class="QPushButton" name="MumbleBtn">
-    <property name="geometry">
-     <rect>
-      <x>4</x>
-      <y>202</y>
-      <width>93</width>
-      <height>30</height>
-     </rect>
-    </property>
-    <property name="mouseTracking">
-     <bool>true</bool>
-    </property>
-    <property name="styleSheet">
-     <string notr="true"/>
-    </property>
-    <property name="text">
-     <string>Mumble</string>
     </property>
    </widget>
   </widget>
